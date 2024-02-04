@@ -1,0 +1,26 @@
+[config]
+timestep = 100.0
+steps = 100
+export_step = 10
+export_directory = "export_files"
+export_file_name_prefix = "SIM"
+
+[[system.bodies]]
+name = "Sun"
+mass = 1.989e30
+[system.bodies.position]
+x = 1.0
+y = 2.0
+[system.bodies.velocity]
+x = 3.0
+y = 4.0
+
+[[system.bodies]]
+name = "Earth"
+mass = 5.972e24
+[system.bodies.position]
+x = 1.495978707e11
+y = 0.0
+[system.bodies.velocity]
+x = 0.0
+y = 4e5
