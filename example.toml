@@ -1,6 +1,6 @@
 [config]
-timestep = 100.0
-steps = 100
+timestep = 400.0
+steps = 15234
 export_step = 10
 export_directory = "export_files"
 export_file_name_prefix = "SIM"

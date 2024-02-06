@@ -21,7 +21,6 @@ pub struct ConfigSystem {
 
 impl ConfigSystem {
     pub fn parse(filename: String) -> Result<Self, ApplicationError> {
-
         let mut file = File::open(filename)?;
         let mut contents = String::new();
         file.read_to_string(&mut contents)?;
@@ -30,7 +29,10 @@ impl ConfigSystem {
         match config_result {
             Ok(config) => Ok(config),
             Err(e) => {
-                println!("Error when parsing config from file {e}");
+                tracing::event!(
+                    tracing::Level::ERROR,
+                    "Error when parsing config from file {e}"
+                );
                 Err(ApplicationError::from(e))
             }
         }
