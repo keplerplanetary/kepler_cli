@@ -1,5 +1,5 @@
 use maths_rs::num::Cast;
-use planety_core::{system_timestep, System};
+use kepler_core::{system_timestep, System};
 
 use crate::{configsystem::Config, export::export_system_to_csv};
 

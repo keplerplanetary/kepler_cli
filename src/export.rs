@@ -1,6 +1,6 @@
 use std::{error::Error, fs::DirBuilder, path::Path};
 
-use planety_core::System;
+use kepler_core::System;
 
 use crate::configsystem::Config;
 
