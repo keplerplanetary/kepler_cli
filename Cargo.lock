@@ -242,7 +242,7 @@ dependencies = [
 [[package]]
 name = "kepler_core"
 version = "0.1.0"
-source = "git+https://github.com/keplerplanetary/kepler_core.git#072c4f8c68b6a765b05d8901bb6ebf459cd139fa"
+source = "git+https://github.com/keplerplanetary/kepler_core.git#aab6dcd70246a53e9002c457a0f20032bf830a71"
 dependencies = [
  "accrete",
  "maths-rs",
