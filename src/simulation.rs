@@ -1,14 +1,28 @@
-use maths_rs::num::Cast;
 use kepler_core::{system_timestep, System};
+use maths_rs::num::Cast;
 
-use crate::{configsystem::Config, export::export_system_to_csv};
+use crate::{
+    configsystem::Config, export::export_system_snapshot_to_csv,
+    export::export_system_to_csv_by_body,
+};
 
 pub fn run_simulation(config: Config, initial_system: System) {
     let mut system = initial_system.clone();
 
     let mut time = 0.0;
 
-    match export_system_to_csv(config.clone(), system.clone(), 0, time) {
+    match export_system_snapshot_to_csv(config.clone(), system.clone(), 0, time) {
+        Ok(_) => {
+            tracing::event!(tracing::Level::DEBUG, "Exported 0, time {time}s");
+        }
+        Err(e) => {
+            tracing::event!(tracing::Level::ERROR, "error while exporting {e}");
+
+            println!("error while exporting {e}");
+            return;
+        }
+    };
+    match export_system_to_csv_by_body(config.clone(), system.clone(), 0, time) {
         Ok(_) => {
             tracing::event!(tracing::Level::DEBUG, "Exported 0, time {time}s");
         }
@@ -24,7 +38,16 @@ pub fn run_simulation(config: Config, initial_system: System) {
         time += config.timestep;
 
         if i % config.export_step == 0 {
-            match export_system_to_csv(config.clone(), system.clone(), i, time) {
+            match export_system_snapshot_to_csv(config.clone(), system.clone(), i, time) {
+                Ok(_) => {
+                    tracing::event!(tracing::Level::DEBUG, "Exported 0, time {time}s");
+                }
+                Err(e) => {
+                    tracing::event!(tracing::Level::ERROR, "error while exporting {e}");
+                    return;
+                }
+            };
+            match export_system_to_csv_by_body(config.clone(), system.clone(), i, time) {
                 Ok(_) => {
                     tracing::event!(tracing::Level::DEBUG, "Exported 0, time {time}s");
                 }
