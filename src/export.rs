@@ -1,9 +1,9 @@
-use kepler_core::System;
+use kepler_core::types::System;
 use std::{
     error::Error,
     fs::{DirBuilder, OpenOptions},
     io::Write,
-    path::{Path, PathBuf},
+    path::Path,
 };
 
 use crate::configsystem::Config;

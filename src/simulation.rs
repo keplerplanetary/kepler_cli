@@ -1,4 +1,4 @@
-use kepler_core::{system_timestep, System};
+use kepler_core::{energy::calculate_system_energy, mover::system_timestep, types::System};
 use maths_rs::num::Cast;
 
 use crate::{
@@ -59,7 +59,7 @@ pub fn run_simulation(config: Config, initial_system: System) {
 
             let human_readable_time = format_time(time.as_u64());
             let progress = i.as_f64() / config.steps.as_f64() * 100.0;
-            let energy: f64 = kepler_core::calculate_system_energy(system.clone());
+            let energy: f64 = calculate_system_energy(system.clone());
 
             tracing::event!(
                 tracing::Level::INFO,
