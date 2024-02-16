@@ -73,21 +73,69 @@ pub fn run_simulation(config: Config, initial_system: System) {
 }
 
 fn format_time(time: u64) -> String {
-    if time < 60 {
+    let one_min = 60;
+    let one_hour = one_min * 60; // 3600 seconds
+    let one_day = one_hour * 24; // 86_400 seconds
+    let one_month = one_day * 30; // 2_592_000 seconds
+    let one_year = one_month * 12; // 31_104_000 seconds
+    if time < one_min {
         format!("{:.2}s", time)
-    } else if 60 <= time && time < 3600 {
+    } else if (one_min..one_hour).contains(&time) {
         // 1 minute to 1 hour
-        format!("{:.2}min", time.as_f64() / 60.0)
-    } else if 3600 <= time && time < 68400 {
+        format!("{:.2}min", time.as_f64() / one_min as f64)
+    } else if (one_hour..one_day).contains(&time) {
         // 1 hour to 1 day
-        format!("{:.2}h", time.as_f64() / 3600.0)
-    } else if 68400 <= time && time < 2592000 {
+        format!("{:.2}h", time.as_f64() / one_hour as f64)
+    } else if (one_day..one_month).contains(&time) {
         // 1 day to 1 month
-        format!("{:.2}months", time.as_f64() / 68400.0)
-    } else if 2592000 <= time && time < 31104000 {
+        format!("{:.2}days", time.as_f64() / one_day as f64)
+    } else if (one_month..one_year).contains(&time) {
         // 1 month to 1 year
-        format!("{:.2}y", time.as_f64() / 2592000.0)
+        format!("{:.2}months", time.as_f64() / one_month as f64)
+    } else if time > one_year {
+        format!("{:.2}y", time.as_f64() / one_year as f64)
     } else {
-        return "?".to_owned();
+        "?".to_owned()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::format_time;
+
+    #[test]
+    pub fn correctly_formats_time() {
+        let seconds = 86_400;
+        let expected_output = "1.00days".to_string();
+        let actual_output = format_time(seconds);
+        assert_eq!(expected_output, actual_output);
+        let seconds = 86_399;
+        let expected_output = "24.00h".to_string();
+        let actual_output = format_time(seconds);
+        assert_eq!(expected_output, actual_output);
+        let seconds = 86_300;
+        let expected_output = "23.97h".to_string();
+        let actual_output = format_time(seconds);
+        assert_eq!(expected_output, actual_output);
+        let seconds = 360;
+        let expected_output = "6.00min".to_string();
+        let actual_output = format_time(seconds);
+        assert_eq!(expected_output, actual_output);
+        let seconds = 2_500_000;
+        let expected_output = "28.94days".to_string();
+        let actual_output = format_time(seconds);
+        assert_eq!(expected_output, actual_output);
+        let seconds = 2_592_000;
+        let expected_output = "1.00months".to_string();
+        let actual_output = format_time(seconds);
+        assert_eq!(expected_output, actual_output);
+        let seconds = (31_104_000.0 * 15.5) as u64; // 15.5 years
+        let expected_output = "15.50y".to_string();
+        let actual_output = format_time(seconds);
+        assert_eq!(expected_output, actual_output);
+        let seconds = 1234567890;
+        let expected_output = "39.69y".to_string();
+        let actual_output = format_time(seconds);
+        assert_eq!(expected_output, actual_output);
     }
 }
