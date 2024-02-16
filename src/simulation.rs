@@ -72,6 +72,9 @@ pub fn run_simulation(config: Config, initial_system: System) {
     }
 }
 
+/// This function formats time in seconds in a human readable format.
+/// It assumes one month is 30 days and one year is 12 * 30 days,
+/// so it's not extremely precise.
 fn format_time(time: u64) -> String {
     let one_min = 60;
     let one_hour = one_min * 60; // 3600 seconds
