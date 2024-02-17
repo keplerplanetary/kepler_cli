@@ -12,8 +12,8 @@ use std::{
 use crate::configsystem::Config;
 
 pub fn export_system_snapshot_to_csv(
-    config: Config,
-    system: System,
+    config: &Config,
+    system: &System,
     step: i64,
     time: f64,
 ) -> Result<(), Box<dyn Error>> {
@@ -37,10 +37,10 @@ pub fn export_system_snapshot_to_csv(
 
     wtr.write_record(&headers)?;
 
-    for body in system.bodies {
+    for body in system.bodies.iter() {
         wtr.serialize((
             time,
-            body.name,
+            body.name.clone(),
             body.mass,
             body.position.x,
             body.position.y,
@@ -54,8 +54,8 @@ pub fn export_system_snapshot_to_csv(
 }
 
 pub fn export_system_to_csv_by_body(
-    config: Config,
-    system: System,
+    config: &Config,
+    system: &System,
     step: i64,
     time: f64,
 ) -> Result<(), Box<dyn Error>> {
@@ -73,7 +73,7 @@ pub fn export_system_to_csv_by_body(
             .expect("That the export path could be created.");
     }
 
-    for body in system.bodies {
+    for body in system.bodies.iter() {
         let filename = format! {"{}_{}.csv", config.export_file_name_prefix, body.name};
         let filename_path = Path::new(&filename);
         let fullpath = path.join(filename_path);

@@ -25,7 +25,7 @@ pub fn run_simulation(config: Config, initial_system: System) {
         };
     }
     if config.export_system_state {
-        match export_system_snapshot_to_csv(config.clone(), system.clone(), 0, time) {
+        match export_system_snapshot_to_csv(&config, &system, 0, time) {
             Ok(_) => {
                 tracing::event!(tracing::Level::DEBUG, "Exported 0, time {time}s");
             }
@@ -39,7 +39,7 @@ pub fn run_simulation(config: Config, initial_system: System) {
     }
 
     if config.export_body_history {
-        match export_system_to_csv_by_body(config.clone(), system.clone(), 0, time) {
+        match export_system_to_csv_by_body(&config, &system, 0, time) {
             Ok(_) => {
                 tracing::event!(tracing::Level::DEBUG, "Exported 0, time {time}s");
             }
@@ -69,7 +69,7 @@ pub fn run_simulation(config: Config, initial_system: System) {
                 };
             }
             if config.export_system_state {
-                match export_system_snapshot_to_csv(config.clone(), system.clone(), i, time) {
+                match export_system_snapshot_to_csv(&config, &system, i, time) {
                     Ok(_) => {
                         tracing::event!(tracing::Level::DEBUG, "Exported 0, time {time}s");
                     }
@@ -81,7 +81,7 @@ pub fn run_simulation(config: Config, initial_system: System) {
             }
 
             if config.export_body_history {
-                match export_system_to_csv_by_body(config.clone(), system.clone(), i, time) {
+                match export_system_to_csv_by_body(&config, &system, i, time) {
                     Ok(_) => {
                         tracing::event!(tracing::Level::DEBUG, "Exported 0, time {time}s");
                     }
