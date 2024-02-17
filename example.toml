@@ -4,6 +4,9 @@ steps = 15234
 export_step = 10
 export_directory = "export_files"
 export_file_name_prefix = "SIM"
+export_system_state = false # defaults to false
+export_body_history = true # defaults to false
+
 
 [[system.bodies]]
 name = "Sun"

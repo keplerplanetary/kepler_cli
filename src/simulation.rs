@@ -11,51 +11,62 @@ pub fn run_simulation(config: Config, initial_system: System) {
 
     let mut time = 0.0;
 
-    match export_system_snapshot_to_csv(config.clone(), system.clone(), 0, time) {
-        Ok(_) => {
-            tracing::event!(tracing::Level::DEBUG, "Exported 0, time {time}s");
-        }
-        Err(e) => {
-            tracing::event!(tracing::Level::ERROR, "error while exporting {e}");
+    if config.export_system_state {
+        match export_system_snapshot_to_csv(config.clone(), system.clone(), 0, time) {
+            Ok(_) => {
+                tracing::event!(tracing::Level::DEBUG, "Exported 0, time {time}s");
+            }
+            Err(e) => {
+                tracing::event!(tracing::Level::ERROR, "error while exporting {e}");
 
-            println!("error while exporting {e}");
-            return;
-        }
-    };
-    match export_system_to_csv_by_body(config.clone(), system.clone(), 0, time) {
-        Ok(_) => {
-            tracing::event!(tracing::Level::DEBUG, "Exported 0, time {time}s");
-        }
-        Err(e) => {
-            tracing::event!(tracing::Level::ERROR, "error while exporting {e}");
+                println!("error while exporting {e}");
+                return;
+            }
+        };
+    }
 
-            println!("error while exporting {e}");
-            return;
-        }
-    };
+    if config.export_body_history {
+        match export_system_to_csv_by_body(config.clone(), system.clone(), 0, time) {
+            Ok(_) => {
+                tracing::event!(tracing::Level::DEBUG, "Exported 0, time {time}s");
+            }
+            Err(e) => {
+                tracing::event!(tracing::Level::ERROR, "error while exporting {e}");
+
+                println!("error while exporting {e}");
+                return;
+            }
+        };
+    }
+
     for i in 1..config.steps + 1 {
         system = system_timestep(system, config.timestep);
         time += config.timestep;
 
         if i % config.export_step == 0 {
-            match export_system_snapshot_to_csv(config.clone(), system.clone(), i, time) {
-                Ok(_) => {
-                    tracing::event!(tracing::Level::DEBUG, "Exported 0, time {time}s");
-                }
-                Err(e) => {
-                    tracing::event!(tracing::Level::ERROR, "error while exporting {e}");
-                    return;
-                }
-            };
-            match export_system_to_csv_by_body(config.clone(), system.clone(), i, time) {
-                Ok(_) => {
-                    tracing::event!(tracing::Level::DEBUG, "Exported 0, time {time}s");
-                }
-                Err(e) => {
-                    tracing::event!(tracing::Level::ERROR, "error while exporting {e}");
-                    return;
-                }
-            };
+            if config.export_system_state {
+                match export_system_snapshot_to_csv(config.clone(), system.clone(), i, time) {
+                    Ok(_) => {
+                        tracing::event!(tracing::Level::DEBUG, "Exported 0, time {time}s");
+                    }
+                    Err(e) => {
+                        tracing::event!(tracing::Level::ERROR, "error while exporting {e}");
+                        return;
+                    }
+                };
+            }
+
+            if config.export_body_history {
+                match export_system_to_csv_by_body(config.clone(), system.clone(), i, time) {
+                    Ok(_) => {
+                        tracing::event!(tracing::Level::DEBUG, "Exported 0, time {time}s");
+                    }
+                    Err(e) => {
+                        tracing::event!(tracing::Level::ERROR, "error while exporting {e}");
+                        return;
+                    }
+                };
+            }
 
             let human_readable_time = format_time(time.as_u64());
             let progress = i.as_f64() / config.steps.as_f64() * 100.0;

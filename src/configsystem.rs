@@ -11,6 +11,10 @@ pub struct Config {
     pub export_step: i64,
     pub export_directory: String,
     pub export_file_name_prefix: String,
+    #[serde(default)]
+    pub export_system_state: bool,
+    #[serde(default)]
+    pub export_body_history: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

@@ -71,7 +71,7 @@ pub fn export_system_to_csv_by_body(
     }
 
     for body in system.bodies {
-        let filename = format! {"{}.csv", body.name};
+        let filename = format! {"{}_{}.csv", config.export_file_name_prefix, body.name};
         let filename_path = Path::new(&filename);
         let fullpath = path.join(filename_path);
 
