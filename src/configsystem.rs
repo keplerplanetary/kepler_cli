@@ -15,6 +15,8 @@ pub struct Config {
     pub export_system_state: bool,
     #[serde(default)]
     pub export_body_history: bool,
+    #[serde(default)]
+    pub export_system_parameters_history: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
