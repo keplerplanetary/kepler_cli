@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-kepler_core = {git= "https://github.com/keplerplanetary/kepler_core.git"}
+kepler_core = { git= "https://github.com/keplerplanetary/kepler_core.git" }
 toml = "0.8.9"
 maths-rs = "0.2.6"
 csv = "1.3.0"

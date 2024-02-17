@@ -1,5 +1,6 @@
 /target
 export_files
+.vscode
 
 
 # Added by cargo

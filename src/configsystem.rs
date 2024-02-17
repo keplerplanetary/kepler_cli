@@ -1,4 +1,4 @@
-use kepler_core::System;
+use kepler_core::types::System;
 use serde::{Deserialize, Serialize};
 use std::{fs::File, io::Read};
 
