@@ -1,4 +1,4 @@
-use kepler_core::{energy::calculate_system_energy, mover::system_timestep, types::System};
+use kepler_core::{mover::system_timestep, types::System};
 use maths_rs::num::Cast;
 
 use crate::{

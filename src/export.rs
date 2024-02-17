@@ -119,12 +119,9 @@ pub fn export_system_to_csv_by_body(
         ))?;
 
         // here we remove the generated newline character from the csv library so that we can use writeln below.
-        let text = String::from_utf8(wtr.into_inner()?)?.replace("\n", "");
+        let text = String::from_utf8(wtr.into_inner()?)?.replace('\n', "");
 
-        let mut file = OpenOptions::new()
-            .write(true)
-            .append(true)
-            .open(&fullpath)?;
+        let mut file = OpenOptions::new().append(true).open(&fullpath)?;
         writeln!(file, "{}", text)?;
     }
 
@@ -208,19 +205,16 @@ pub fn export_system_parameters_to_csv(
     ))?;
 
     // here we remove the generated newline character from the csv library so that we can use writeln below.
-    let text = String::from_utf8(wtr.into_inner()?)?.replace("\n", "");
+    let text = String::from_utf8(wtr.into_inner()?)?.replace('\n', "");
 
-    let mut file = OpenOptions::new()
-        .write(true)
-        .append(true)
-        .open(&fullpath)?;
+    let mut file = OpenOptions::new().append(true).open(&fullpath)?;
     writeln!(file, "{}", text)?;
 
     Ok(())
 }
 
 fn write_csv_headers(fullpath: &PathBuf, headers: &Vec<String>) -> Result<(), Box<dyn Error>> {
-    let mut wtr = csv::Writer::from_path(&fullpath)?;
+    let mut wtr = csv::Writer::from_path(fullpath)?;
     wtr.write_record(headers)?;
     wtr.flush()?;
     Ok(())
