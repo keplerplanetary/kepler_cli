@@ -65,30 +65,32 @@ pub fn export_system_to_csv_by_body(
         let filename = format! {"{}.csv", body.name};
         let filename_path = Path::new(&filename);
         let fullpath = path.join(filename_path);
-        let mut wtr = csv::Writer::from_writer(vec![]);
-        wtr.serialize((
-            time,
-            body.mass,
-            body.position.x,
-            body.position.y,
-            body.velocity.x,
-            body.velocity.y,
-        ))?;
-        // TODO: Remove newlines from csv writer generated lines
 
-        let text = String::from_utf8(wtr.into_inner()?)?;
-
+        // first, check if the object we want to write to exists, and if it does, if it is a file
         match std::fs::metadata(&fullpath) {
             Ok(metadata) => {
                 if metadata.is_file() {
-                    let mut file = OpenOptions::new().write(true).append(true).open(fullpath)?;
-                    writeln!(file, "{}", text)?;
+                    // nothing to do, we can go ahead
+                } else {
+                    // we would like to write to something that exists, but it's not a file
+                    // so we return a file not found error
+                    return Err(Box::new(std::io::Error::new(
+                        std::io::ErrorKind::NotFound,
+                        format!(
+                            "The destination file object already exists, but it is not a file: {}",
+                            fullpath
+                                .to_str()
+                                .expect("that the path can be formatted as str")
+                        ),
+                    )));
                 }
             }
-            Err(_) => {
-                let mut wtr = csv::Writer::from_path(fullpath)?;
-                wtr.write_record(["Time", "Mass", "x", "y", "vx", "vy"])?;
+            Err(_e) => {
+                // if the fs object we want to write to does not exist, we create a file and write the csv headers
+                let mut wtr = csv::Writer::from_path(&fullpath)?;
+                wtr.write_record(["Step", "Time", "Mass", "x", "y", "vx", "vy"])?;
                 wtr.serialize((
+                    step,
                     time,
                     body.mass,
                     body.position.x,
@@ -99,6 +101,26 @@ pub fn export_system_to_csv_by_body(
                 wtr.flush()?;
             }
         }
+
+        // in any case, we write a new line to the export file, possibly after creating it first
+        let mut wtr = csv::Writer::from_writer(vec![]);
+        wtr.serialize((
+            time,
+            body.mass,
+            body.position.x,
+            body.position.y,
+            body.velocity.x,
+            body.velocity.y,
+        ))?;
+
+        // here we remove the generated newline character from the csv library so that we can use writeln below.
+        let text = String::from_utf8(wtr.into_inner()?)?.replace("\n", "");
+
+        let mut file = OpenOptions::new()
+            .write(true)
+            .append(true)
+            .open(&fullpath)?;
+        writeln!(file, "{}", text)?;
     }
 
     Ok(())
