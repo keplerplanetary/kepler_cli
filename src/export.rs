@@ -3,7 +3,7 @@ use std::{
     error::Error,
     fs::{DirBuilder, OpenOptions},
     io::Write,
-    path::Path,
+    path::{Path, PathBuf},
 };
 
 use crate::configsystem::Config;
@@ -14,6 +14,10 @@ pub fn export_system_snapshot_to_csv(
     step: i64,
     time: f64,
 ) -> Result<(), Box<dyn Error>> {
+    let headers: Vec<String> = vec!["Time", "Name", "Mass", "x", "y", "vx", "vy"]
+        .into_iter()
+        .map(|s| s.to_owned())
+        .collect();
     let path = Path::new(&config.export_directory);
 
     if !path.exists() {
@@ -28,7 +32,7 @@ pub fn export_system_snapshot_to_csv(
     let fullpath = path.join(filename_path);
     let mut wtr = csv::Writer::from_path(fullpath)?;
 
-    wtr.write_record(["Time", "Name", "Mass", "x", "y", "vx", "vy"])?;
+    wtr.write_record(&headers)?;
 
     for body in system.bodies {
         wtr.serialize((
@@ -52,6 +56,11 @@ pub fn export_system_to_csv_by_body(
     step: i64,
     time: f64,
 ) -> Result<(), Box<dyn Error>> {
+    let headers: Vec<String> = vec!["Step", "Time", "Mass", "x", "y", "vx", "vy"]
+        .into_iter()
+        .map(|s| s.to_owned())
+        .collect();
+
     let path = Path::new(&config.export_directory);
 
     if !path.exists() {
@@ -70,6 +79,10 @@ pub fn export_system_to_csv_by_body(
         match std::fs::metadata(&fullpath) {
             Ok(metadata) => {
                 if metadata.is_file() {
+                    if step == 0 {
+                        // overwrite the file with fresh headers
+                        write_csv_headers(&fullpath, &headers)?;
+                    }
                     // nothing to do, we can go ahead
                 } else {
                     // we would like to write to something that exists, but it's not a file
@@ -87,18 +100,7 @@ pub fn export_system_to_csv_by_body(
             }
             Err(_e) => {
                 // if the fs object we want to write to does not exist, we create a file and write the csv headers
-                let mut wtr = csv::Writer::from_path(&fullpath)?;
-                wtr.write_record(["Step", "Time", "Mass", "x", "y", "vx", "vy"])?;
-                wtr.serialize((
-                    step,
-                    time,
-                    body.mass,
-                    body.position.x,
-                    body.position.y,
-                    body.velocity.x,
-                    body.velocity.y,
-                ))?;
-                wtr.flush()?;
+                write_csv_headers(&fullpath, &headers)?;
             }
         }
 
@@ -123,5 +125,12 @@ pub fn export_system_to_csv_by_body(
         writeln!(file, "{}", text)?;
     }
 
+    Ok(())
+}
+
+fn write_csv_headers(fullpath: &PathBuf, headers: &Vec<String>) -> Result<(), Box<dyn Error>> {
+    let mut wtr = csv::Writer::from_path(&fullpath)?;
+    wtr.write_record(headers)?;
+    wtr.flush()?;
     Ok(())
 }
