@@ -1,4 +1,4 @@
-use kepler_core::{mover::system_timestep, types::System};
+use kepler_core::{energy::calculate_system_energy, mover::system_timestep, types::System};
 use maths_rs::num::Cast;
 
 use crate::{
@@ -7,9 +7,12 @@ use crate::{
         export_system_parameters_to_csv, export_system_snapshot_to_csv,
         export_system_to_csv_by_body,
     },
+    plot::plot_total_energy,
 };
 
 pub fn run_simulation(config: Config, initial_system: System) {
+    let mut energy_plot_data: Vec<(f64, f64)> = vec![];
+
     let mut system = initial_system.clone();
 
     let mut time = 0.0;
@@ -57,6 +60,11 @@ pub fn run_simulation(config: Config, initial_system: System) {
         time += config.timestep;
 
         if i % config.export_step == 0 {
+            // save data for plotting
+
+            energy_plot_data.push((time, calculate_system_energy(&system)));
+
+            // writing to file
             if config.export_system_parameters_history {
                 match export_system_parameters_to_csv(&config, &system, i, time) {
                     Ok(_) => {
@@ -103,6 +111,8 @@ pub fn run_simulation(config: Config, initial_system: System) {
             );
         }
     }
+
+    plot_total_energy(energy_plot_data, &config);
 }
 
 /// This function formats time in seconds in a human readable format.

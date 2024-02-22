@@ -6,6 +6,9 @@ mod configsystem;
 mod error;
 mod export;
 mod simulation;
+
+mod plot;
+
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 /// Simple program to greet a person
