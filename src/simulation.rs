@@ -108,37 +108,16 @@ mod test {
 
     #[test]
     pub fn correctly_formats_time() {
-        let seconds = 86_400;
-        let expected_output = "1.00days".to_string();
-        let actual_output = format_time(seconds);
-        assert_eq!(expected_output, actual_output);
-        let seconds = 86_399;
-        let expected_output = "24.00h".to_string();
-        let actual_output = format_time(seconds);
-        assert_eq!(expected_output, actual_output);
-        let seconds = 86_300;
-        let expected_output = "23.97h".to_string();
-        let actual_output = format_time(seconds);
-        assert_eq!(expected_output, actual_output);
-        let seconds = 360;
-        let expected_output = "6.00min".to_string();
-        let actual_output = format_time(seconds);
-        assert_eq!(expected_output, actual_output);
-        let seconds = 2_500_000;
-        let expected_output = "28.94days".to_string();
-        let actual_output = format_time(seconds);
-        assert_eq!(expected_output, actual_output);
-        let seconds = 2_592_000;
-        let expected_output = "1.00months".to_string();
-        let actual_output = format_time(seconds);
-        assert_eq!(expected_output, actual_output);
-        let seconds = (31_104_000.0 * 15.5) as u64; // 15.5 years
-        let expected_output = "15.50y".to_string();
-        let actual_output = format_time(seconds);
-        assert_eq!(expected_output, actual_output);
-        let seconds = 1234567890;
-        let expected_output = "39.69y".to_string();
-        let actual_output = format_time(seconds);
-        assert_eq!(expected_output, actual_output);
+        assert_eq!("1.00days".to_string(), format_time(86_400));
+        assert_eq!("24.00h".to_string(), format_time(86_399));
+        assert_eq!("23.97h".to_string(), format_time(86_300));
+        assert_eq!("6.00min".to_string(), format_time(360));
+        assert_eq!("28.94days".to_string(), format_time(2_500_000));
+        assert_eq!("1.00months".to_string(), format_time(2_592_000));
+        assert_eq!(
+            "15.50y".to_string(),
+            format_time((31_104_000.0 * 15.5) as u64)
+        );
+        assert_eq!("39.69y".to_string(), format_time(1_234_567_890));
     }
 }
