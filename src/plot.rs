@@ -126,8 +126,8 @@ pub fn plot_total_energy(
         .y_labels(6)
         .x_label_formatter(&format_label)
         .y_label_formatter(&format_label)
-        .x_desc("Time (s)")
-        .y_desc("Energy (J?)")
+        .x_desc("Time / s")
+        .y_desc("Energy / J")
         .draw()?;
 
     let total_energy_series_annotation = chart_context.draw_series(LineSeries::new(
