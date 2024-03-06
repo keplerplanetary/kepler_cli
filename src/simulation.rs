@@ -1,4 +1,8 @@
-use kepler_core::{energy::calculate_system_energy, mover::system_timestep, types::System};
+use kepler_core::{
+    energy::{calculate_kinetic_energy, calculate_potential_energy, calculate_system_energy},
+    mover::system_timestep,
+    types::System,
+};
 use maths_rs::num::Cast;
 
 use crate::{
@@ -64,6 +68,18 @@ pub fn run_simulation(config: Config, initial_system: System) {
             energy_plot_data.push(PlotDatum {
                 time,
                 total_energy: calculate_system_energy(&system),
+                kinetic_energy: system.bodies.iter().map(calculate_kinetic_energy).sum(),
+                potential_energy: system
+                    .bodies
+                    .iter()
+                    .map(|body| {
+                        system
+                            .bodies
+                            .iter()
+                            .map(|other| calculate_potential_energy(body, other))
+                            .sum::<f64>()
+                    })
+                    .sum::<f64>(),
             });
 
             // writing to file
