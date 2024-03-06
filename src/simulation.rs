@@ -7,11 +7,11 @@ use crate::{
         export_system_parameters_to_csv, export_system_snapshot_to_csv,
         export_system_to_csv_by_body,
     },
-    plot::plot_total_energy,
+    plot::{plot_total_energy, PlotDatum},
 };
 
 pub fn run_simulation(config: Config, initial_system: System) {
-    let mut energy_plot_data: Vec<(f64, f64)> = vec![];
+    let mut energy_plot_data: Vec<PlotDatum> = vec![];
 
     let mut system = initial_system.clone();
 
@@ -61,8 +61,10 @@ pub fn run_simulation(config: Config, initial_system: System) {
 
         if i % config.export_step == 0 {
             // save data for plotting
-
-            energy_plot_data.push((time, calculate_system_energy(&system)));
+            energy_plot_data.push(PlotDatum {
+                time,
+                total_energy: calculate_system_energy(&system),
+            });
 
             // writing to file
             if config.export_system_parameters_history {
