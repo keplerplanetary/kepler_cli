@@ -100,24 +100,33 @@ pub fn plot_total_energy(
         }
     }
 
-    let label_size = root_drawing_area
-        .estimate_text_size(
-            &format_label(&y_max_total_energy),
-            &TextStyle {
-                font: ("Sans-serif", 20).into_font(),
-                color: BLACK.to_backend_color(),
-                pos: Pos {
-                    h_pos: plotters::style::text_anchor::HPos::Center,
-                    v_pos: plotters::style::text_anchor::VPos::Center,
-                },
+    let y_label_size = root_drawing_area.estimate_text_size(
+        &format_label(&y_max_total_energy),
+        &TextStyle {
+            font: ("Sans-serif", 20).into_font(),
+            color: BLACK.to_backend_color(),
+            pos: Pos {
+                h_pos: plotters::style::text_anchor::HPos::Center,
+                v_pos: plotters::style::text_anchor::VPos::Center,
             },
-        )
-        .expect("Should be able to estimate the text size");
+        },
+    )?;
+    let x_label_size = root_drawing_area.estimate_text_size(
+        &format_label(&x_max),
+        &TextStyle {
+            font: ("Sans-serif", 15).into_font(),
+            color: BLACK.to_backend_color(),
+            pos: Pos {
+                h_pos: plotters::style::text_anchor::HPos::Center,
+                v_pos: plotters::style::text_anchor::VPos::Center,
+            },
+        },
+    )?;
 
     let mut chart_context = ChartBuilder::on(&root_drawing_area)
         .caption("System Energy over Time", ("Sans-serif", 20).into_font())
-        .x_label_area_size(label_size.0)
-        .y_label_area_size(label_size.0)
+        .x_label_area_size(x_label_size.0)
+        .y_label_area_size(y_label_size.0)
         .build_cartesian_2d(x_min..x_max, y_min_energy..y_max_total_energy)?;
 
     chart_context
