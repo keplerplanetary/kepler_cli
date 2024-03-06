@@ -41,7 +41,7 @@ pub fn plot_total_energy(
     root_drawing_area
         .fill(&WHITE)
         .expect("Should be able to fill the drawing area with white");
-    let root_drawing_area = root_drawing_area.margin(20, 20, 20, 20);
+    let root_drawing_area = root_drawing_area.margin(20, 20, 20, 40);
     let total_energy_color = RED;
     let potential_energy_color = BLUE;
     let kinetic_energy_color = GREEN;
@@ -50,7 +50,7 @@ pub fn plot_total_energy(
         .iter()
         .map(|e| e.time)
         .fold(f64::INFINITY, |a, b| a.min(b));
-    let mut x_max = data
+    let x_max = data
         .iter()
         .map(|e| e.time)
         .fold(-f64::INFINITY, |a, b| a.max(b));
@@ -68,7 +68,7 @@ pub fn plot_total_energy(
         .fold(f64::INFINITY, |a, b| a.min(b));
     // add 5% padding around the max and min values
     x_min *= 0.95;
-    x_max *= 1.05;
+    // x_max *= 1.05; // max time should not be padded
     y_max_total_energy *= 1.05;
     y_min_potential_energy *= 0.95;
     y_min_kinetic_energy *= 0.95;
@@ -113,8 +113,8 @@ pub fn plot_total_energy(
         .y_labels(6)
         .x_label_formatter(&format_label)
         .y_label_formatter(&format_label)
-        .y_desc("Time (s)")
-        .x_desc("Total Energy (J?)")
+        .x_desc("Time (s)")
+        .y_desc("Energy (J?)")
         .draw()?;
 
     let total_energy_series_annotation = chart_context.draw_series(LineSeries::new(
