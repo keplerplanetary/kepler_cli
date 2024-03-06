@@ -19,8 +19,10 @@ pub struct PlotDatum {
     pub potential_energy: f64,
 }
 
-// TODO: add potential and kinetic energy
-pub fn plot_total_energy(data: Vec<PlotDatum>, config: &Config) {
+pub fn plot_total_energy(
+    data: Vec<PlotDatum>,
+    config: &Config,
+) -> Result<(), DrawingAreaErrorKind<std::io::Error>> {
     let path = Path::new(&config.export_directory);
 
     if !path.exists() {
@@ -52,10 +54,6 @@ pub fn plot_total_energy(data: Vec<PlotDatum>, config: &Config) {
         .iter()
         .map(|e| e.time)
         .fold(-f64::INFINITY, |a, b| a.max(b));
-    let mut _y_min_total_energy = data
-        .iter()
-        .map(|e| e.total_energy)
-        .fold(f64::INFINITY, |a, b| a.min(b));
     let mut y_max_total_energy = data
         .iter()
         .map(|e| e.total_energy)
@@ -64,28 +62,17 @@ pub fn plot_total_energy(data: Vec<PlotDatum>, config: &Config) {
         .iter()
         .map(|e| e.potential_energy)
         .fold(f64::INFINITY, |a, b| a.min(b));
-    let mut _y_max_potential_energy = data
-        .iter()
-        .map(|e| e.potential_energy)
-        .fold(-f64::INFINITY, |a, b| a.max(b));
     let mut y_min_kinetic_energy = data
         .iter()
         .map(|e| e.kinetic_energy)
         .fold(f64::INFINITY, |a, b| a.min(b));
-    let mut _y_max_kinetic_energy = data
-        .iter()
-        .map(|e| e.kinetic_energy)
-        .fold(-f64::INFINITY, |a, b| a.max(b));
     // add 5% padding around the max and min values
     x_min *= 0.95;
     x_max *= 1.05;
-    _y_min_total_energy *= 0.95;
     y_max_total_energy *= 1.05;
     y_min_potential_energy *= 0.95;
-    _y_max_potential_energy *= 1.05;
     y_min_kinetic_energy *= 0.95;
-    _y_max_kinetic_energy *= 1.05;
-    let min_energy = min(y_min_potential_energy, y_min_kinetic_energy);
+    let y_min_energy = min(y_min_potential_energy, y_min_kinetic_energy);
 
     let y_label_size = root_drawing_area
         .estimate_text_size(
@@ -100,7 +87,6 @@ pub fn plot_total_energy(data: Vec<PlotDatum>, config: &Config) {
             },
         )
         .expect("Should be able to estimate the text size");
-
     let x_label_size = root_drawing_area
         .estimate_text_size(
             &format_label(&y_max_total_energy),
@@ -114,20 +100,14 @@ pub fn plot_total_energy(data: Vec<PlotDatum>, config: &Config) {
             },
         )
         .expect("Should be able to estimate the text size");
-    let mut chart_context = match ChartBuilder::on(&root_drawing_area)
+
+    let mut chart_context = ChartBuilder::on(&root_drawing_area)
         .caption("System Energy over Time", ("Sans-serif", 20).into_font())
         .x_label_area_size(x_label_size.0)
         .y_label_area_size(y_label_size.0)
-        .build_cartesian_2d(x_min..x_max, min_energy..y_max_total_energy)
-    {
-        Ok(chart) => chart,
-        Err(e) => {
-            tracing::event!(tracing::Level::ERROR, "Error while creating chart: {e}");
-            return;
-        }
-    };
+        .build_cartesian_2d(x_min..x_max, y_min_energy..y_max_total_energy)?;
 
-    match chart_context
+    chart_context
         .configure_mesh()
         .x_labels(6)
         .y_labels(6)
@@ -135,68 +115,36 @@ pub fn plot_total_energy(data: Vec<PlotDatum>, config: &Config) {
         .y_label_formatter(&format_label)
         .y_desc("Time (s)")
         .x_desc("Total Energy (J?)")
-        .draw()
-    {
-        Ok(()) => (),
-        Err(e) => {
-            tracing::event!(tracing::Level::ERROR, "Error while configuring mesh: {e}");
-            return;
-        }
-    };
-    let total_energy_series_annotation = match chart_context.draw_series(LineSeries::new(
+        .draw()?;
+
+    let total_energy_series_annotation = chart_context.draw_series(LineSeries::new(
         data.iter().map(|d| (d.time, d.total_energy)),
         &total_energy_color,
-    )) {
-        Ok(series) => series,
-        Err(e) => {
-            tracing::event!(tracing::Level::ERROR, "Error while drawing series: {e}");
-            return;
-        }
-    };
+    ))?;
     total_energy_series_annotation
         .label("Total Energy")
         .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], total_energy_color));
 
-    let potential_energy_series_annotation = match chart_context.draw_series(LineSeries::new(
+    let potential_energy_series_annotation = chart_context.draw_series(LineSeries::new(
         data.iter().map(|d| (d.time, d.potential_energy)),
         &potential_energy_color,
-    )) {
-        Ok(series) => series,
-        Err(e) => {
-            tracing::event!(tracing::Level::ERROR, "Error while drawing series: {e}");
-            return;
-        }
-    };
+    ))?;
     potential_energy_series_annotation
         .label("Potential Energy")
         .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], potential_energy_color));
 
-    let kinetic_energy_series_annotation = match chart_context.draw_series(LineSeries::new(
+    let kinetic_energy_series_annotation = chart_context.draw_series(LineSeries::new(
         data.iter().map(|d| (d.time, d.kinetic_energy)),
         &kinetic_energy_color,
-    )) {
-        Ok(series) => series,
-        Err(e) => {
-            tracing::event!(tracing::Level::ERROR, "Error while drawing series: {e}");
-            return;
-        }
-    };
+    ))?;
     kinetic_energy_series_annotation
         .label("Kinetic Energy")
         .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], kinetic_energy_color));
-    match chart_context
+    chart_context
         .configure_series_labels()
         .position(SeriesLabelPosition::MiddleRight)
         .border_style(BLACK)
         .legend_area_size(50)
-        .draw()
-    {
-        Ok(()) => (),
-        Err(e) => {
-            tracing::event!(
-                tracing::Level::ERROR,
-                "Error while configuring series labels: {e}"
-            )
-        }
-    };
+        .draw()?;
+    Ok(())
 }

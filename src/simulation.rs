@@ -130,7 +130,17 @@ pub fn run_simulation(config: Config, initial_system: System) {
         }
     }
 
-    plot_total_energy(energy_plot_data, &config);
+    match plot_total_energy(energy_plot_data, &config) {
+        Ok(_) => {
+            tracing::event!(tracing::Level::INFO, "Plotted total energy");
+        }
+        Err(e) => {
+            tracing::event!(
+                tracing::Level::ERROR,
+                "Error while plotting total energy: {e}"
+            );
+        }
+    };
 }
 
 /// This function formats time in seconds in a human readable format.
