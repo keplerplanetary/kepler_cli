@@ -64,23 +64,35 @@ pub fn run_simulation(config: Config, initial_system: System) {
         time += config.timestep;
 
         if i % config.export_step == 0 {
-            // save data for plotting
-            energy_plot_data.push(PlotDatum {
-                time,
-                total_energy: calculate_system_energy(&system),
-                kinetic_energy: system.bodies.iter().map(calculate_kinetic_energy).sum(),
-                potential_energy: system
-                    .bodies
-                    .iter()
-                    .map(|body| {
+            if config.plot_system {
+                // save data for plotting
+                let kinetic_energy = match config.plot_system_kinetic_energy {
+                    true => Some(system.bodies.iter().map(calculate_kinetic_energy).sum()),
+                    false => None,
+                };
+                let potential_energy = match config.plot_system_potential_energy {
+                    true => Some(
                         system
                             .bodies
                             .iter()
-                            .map(|other| calculate_potential_energy(body, other))
-                            .sum::<f64>()
-                    })
-                    .sum::<f64>(),
-            });
+                            .map(|body| {
+                                system
+                                    .bodies
+                                    .iter()
+                                    .map(|other| calculate_potential_energy(body, other))
+                                    .sum::<f64>()
+                            })
+                            .sum::<f64>(),
+                    ),
+                    false => None,
+                };
+                energy_plot_data.push(PlotDatum {
+                    time,
+                    total_energy: calculate_system_energy(&system),
+                    kinetic_energy,
+                    potential_energy,
+                });
+            }
 
             // writing to file
             if config.export_system_parameters_history {
@@ -130,17 +142,19 @@ pub fn run_simulation(config: Config, initial_system: System) {
         }
     }
 
-    match plot_total_energy(energy_plot_data, &config) {
-        Ok(_) => {
-            tracing::event!(tracing::Level::INFO, "Plotted total energy");
-        }
-        Err(e) => {
-            tracing::event!(
-                tracing::Level::ERROR,
-                "Error while plotting total energy: {e}"
-            );
-        }
-    };
+    if config.plot_system {
+        match plot_total_energy(energy_plot_data, &config) {
+            Ok(_) => {
+                tracing::event!(tracing::Level::INFO, "Plotted total energy");
+            }
+            Err(e) => {
+                tracing::event!(
+                    tracing::Level::ERROR,
+                    "Error while plotting total energy: {e}"
+                );
+            }
+        };
+    }
 }
 
 /// This function formats time in seconds in a human readable format.

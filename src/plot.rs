@@ -15,8 +15,8 @@ fn format_label(number: &f64) -> String {
 pub struct PlotDatum {
     pub time: f64,
     pub total_energy: f64,
-    pub kinetic_energy: f64,
-    pub potential_energy: f64,
+    pub kinetic_energy: Option<f64>,
+    pub potential_energy: Option<f64>,
 }
 
 pub fn plot_total_energy(
@@ -58,21 +58,47 @@ pub fn plot_total_energy(
         .iter()
         .map(|e| e.total_energy)
         .fold(-f64::INFINITY, |a, b| a.max(b));
-    let mut y_min_potential_energy = data
+    let mut y_min_total_energy = data
         .iter()
-        .map(|e| e.potential_energy)
+        .map(|e| e.total_energy)
         .fold(f64::INFINITY, |a, b| a.min(b));
-    let mut y_min_kinetic_energy = data
-        .iter()
-        .map(|e| e.kinetic_energy)
-        .fold(f64::INFINITY, |a, b| a.min(b));
+
     // add 5% padding around the max and min values
     x_min *= 0.95;
-    // x_max *= 1.05; // max time should not be padded
     y_max_total_energy *= 1.05;
-    y_min_potential_energy *= 0.95;
-    y_min_kinetic_energy *= 0.95;
-    let y_min_energy = min(y_min_potential_energy, y_min_kinetic_energy);
+    y_min_total_energy *= 0.95;
+    // Initialize y_min_energy with the total energy min value
+    let mut y_min_energy = y_min_total_energy;
+
+    // Check configs to see if we need to plot potential and/or kinetic energy
+    // If we do, calculate the min value for the y axis
+    if config.plot_system_potential_energy || config.plot_system_kinetic_energy {
+        let y_min_kinetic_energy = match config.plot_system_kinetic_energy {
+            true => {
+                data.iter()
+                    .filter_map(|e| e.kinetic_energy)
+                    .fold(f64::INFINITY, |a, b| a.min(b))
+                    * 0.95 // add 5% padding
+            }
+            false => f64::NAN,
+        };
+        let y_min_potential_energy = match config.plot_system_potential_energy {
+            true => {
+                data.iter()
+                    .filter_map(|e| e.potential_energy)
+                    .fold(f64::INFINITY, |a, b| a.min(b))
+                    * 0.95 // add 5% padding
+            }
+            false => f64::NAN,
+        };
+        if y_min_kinetic_energy.is_nan() {
+            y_min_energy = y_min_potential_energy;
+        } else if y_min_potential_energy.is_nan() {
+            y_min_energy = y_min_kinetic_energy;
+        } else {
+            y_min_energy = min(y_min_potential_energy, y_min_kinetic_energy);
+        }
+    }
 
     let label_size = root_drawing_area
         .estimate_text_size(
@@ -112,24 +138,45 @@ pub fn plot_total_energy(
         .label("Total Energy")
         .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], total_energy_color));
 
-    let potential_energy_series_annotation = chart_context.draw_series(LineSeries::new(
-        data.iter().map(|d| (d.time, d.potential_energy)),
-        &potential_energy_color,
-    ))?;
-    potential_energy_series_annotation
-        .label("Potential Energy")
-        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], potential_energy_color));
+    if config.plot_system_potential_energy {
+        let potential_energy_series_annotation = chart_context.draw_series(LineSeries::new(
+            data.iter().map(|d| {
+                (
+                    d.time,
+                    d.potential_energy.expect("Should have potential energy"),
+                )
+            }),
+            &potential_energy_color,
+        ))?;
+        potential_energy_series_annotation
+            .label("Potential Energy")
+            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], potential_energy_color));
+    }
 
-    let kinetic_energy_series_annotation = chart_context.draw_series(LineSeries::new(
-        data.iter().map(|d| (d.time, d.kinetic_energy)),
-        &kinetic_energy_color,
-    ))?;
-    kinetic_energy_series_annotation
-        .label("Kinetic Energy")
-        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], kinetic_energy_color));
+    if config.plot_system_kinetic_energy {
+        let kinetic_energy_series_annotation = chart_context.draw_series(LineSeries::new(
+            data.iter().map(|d| {
+                (
+                    d.time,
+                    d.kinetic_energy.expect("Should have kinetic energy"),
+                )
+            }),
+            &kinetic_energy_color,
+        ))?;
+        kinetic_energy_series_annotation
+            .label("Kinetic Energy")
+            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], kinetic_energy_color));
+    }
+
+    // If we plot the potential energy, put the label in the middle (between the lines)
+    // Otherwise, put it in the upper right corner
+    let label_position = match config.plot_system_potential_energy {
+        true => SeriesLabelPosition::MiddleRight,
+        false => SeriesLabelPosition::UpperRight,
+    };
     chart_context
         .configure_series_labels()
-        .position(SeriesLabelPosition::MiddleRight)
+        .position(label_position)
         .border_style(BLACK)
         .legend_area_size(50)
         .draw()?;
