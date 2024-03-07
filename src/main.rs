@@ -11,7 +11,7 @@ mod plot;
 
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-/// Simple program to greet a person
+/// Command line interface for the Kepler planetary motion simulator
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {

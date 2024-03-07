@@ -17,6 +17,12 @@ pub struct Config {
     pub export_body_history: bool,
     #[serde(default)]
     pub export_system_parameters_history: bool,
+    #[serde(default)]
+    pub plot_system: bool,
+    #[serde(default)]
+    pub plot_system_kinetic_energy: bool,
+    #[serde(default)]
+    pub plot_system_potential_energy: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

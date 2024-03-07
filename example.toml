@@ -7,6 +7,9 @@ export_file_name_prefix = "SIM"
 export_system_state = false # defaults to false
 export_body_history = true # defaults to false
 export_system_parameters_history = true # defaults to false
+plot_system = true # defaults to false
+plot_system_kinetic_energy = true # defaults to false
+plot_system_potential_energy = false # defaults to false
 
 [[system.bodies]]
 name = "Sun"
